@@ -362,14 +362,16 @@ function combineDebounceEntries(entries: BlueBubblesDebounceEntry[]): Normalized
 
 const webhookTargets = new Map<string, WebhookTarget[]>();
 
+type BlueBubblesDebouncer = {
+  enqueue: (item: BlueBubblesDebounceEntry) => Promise<void>;
+  flushKey: (key: string) => Promise<void>;
+};
+
 /**
  * Maps webhook targets to their inbound debouncers.
  * Each target gets its own debouncer keyed by a unique identifier.
  */
-const targetDebouncers = new Map<
-  WebhookTarget,
-  ReturnType<BlueBubblesCoreRuntime["channel"]["debounce"]["createInboundDebouncer"]>
->();
+const targetDebouncers = new Map<WebhookTarget, BlueBubblesDebouncer>();
 
 function resolveBlueBubblesDebounceMs(
   config: OpenClawConfig,
@@ -1920,7 +1922,7 @@ async function processMessage(
             maxBytes,
           });
           const saved = await core.channel.media.saveMediaBuffer(
-            downloaded.buffer,
+            Buffer.from(downloaded.buffer),
             downloaded.contentType,
             "inbound",
             maxBytes,
@@ -2352,7 +2354,7 @@ async function processMessage(
         },
       });
     }
-    if (shouldStopTyping) {
+    if (shouldStopTyping && chatGuidForActions) {
       // Stop typing after streaming completes to avoid a stuck indicator.
       sendBlueBubblesTyping(chatGuidForActions, false, {
         cfg: config,
