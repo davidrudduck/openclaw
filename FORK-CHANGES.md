@@ -3,8 +3,8 @@
 Tracking all changes in our fork that are not yet in upstream `openclaw/openclaw:main`.
 Use this to identify when upstream absorbs our fixes so we can drop the fork delta.
 
-**Last synced with upstream:** 2026-02-11 (upstream commit `841dbeee0`)
-**Our merge commit:** `a98d47421`
+**Last synced with upstream:** 2026-02-12 (upstream commit `b094491cf`)
+**Our merge commit:** `243e5c5bb`
 
 ---
 
@@ -19,17 +19,20 @@ Use this to identify when upstream absorbs our fixes so we can drop the fork del
 | [#12251](https://github.com/openclaw/openclaw/pull/12251) | timing-safe comparison for hook token auth       | `fix/hook-token-timing-safe`        | OPEN   |
 | [#12172](https://github.com/openclaw/openclaw/pull/12172) | harden resolveUserPath and compact               | `fix/trim-bug-remaining-guards`     | OPEN   |
 | [#11867](https://github.com/openclaw/openclaw/pull/11867) | wire message_sent hook — centralised             | `fix/wire-message-sent-hook-pr`     | OPEN   |
+| [#14320](https://github.com/openclaw/openclaw/pull/14320) | context decay — graduated context window mgmt    | `feat/context-decay`                | OPEN   |
 | [#11866](https://github.com/openclaw/openclaw/pull/11866) | guard .trim() on undefined in subagent           | `fix/subagent-trim-crash`           | OPEN   |
 
 ### Closed / Superseded PRs (for reference)
 
-| PR                                                        | Superseded by | Reason                                  |
-| --------------------------------------------------------- | ------------- | --------------------------------------- |
-| [#12371](https://github.com/openclaw/openclaw/pull/12371) | #13185        | Branch deleted during fork maintenance  |
-| [#12370](https://github.com/openclaw/openclaw/pull/12370) | #13184        | Branch deleted during fork maintenance  |
-| [#12253](https://github.com/openclaw/openclaw/pull/12253) | #13183        | Branch deleted during fork maintenance  |
-| [#12207](https://github.com/openclaw/openclaw/pull/12207) | #12251        | Duplicate; same branch, earlier version |
-| [#11823](https://github.com/openclaw/openclaw/pull/11823) | #11867        | Replaced by centralised approach        |
+| PR                                                         | Superseded by | Reason                                  |
+| ---------------------------------------------------------- | ------------- | --------------------------------------- |
+| [#12371](https://github.com/openclaw/openclaw/pull/12371)  | #13185        | Branch deleted during fork maintenance  |
+| [#12370](https://github.com/openclaw/openclaw/pull/12370)  | #13184        | Branch deleted during fork maintenance  |
+| [#12253](https://github.com/openclaw/openclaw/pull/12253)  | #13183        | Branch deleted during fork maintenance  |
+| [#12207](https://github.com/openclaw/openclaw/pull/12207)  | #12251        | Duplicate; same branch, earlier version |
+| [#11823](https://github.com/openclaw/openclaw/pull/11823)  | #11867        | Replaced by centralised approach        |
+| [Fork #8](https://github.com/davidrudduck/openclaw/pull/8) | #14320        | Closed — upstream PR is canonical       |
+| [Fork #9](https://github.com/davidrudduck/openclaw/pull/9) | #14320        | Closed — upstream PR is canonical       |
 
 ---
 
@@ -127,7 +130,35 @@ Guards against `undefined.trim()` crashes in subagent system prompt building and
 
 ---
 
-### 4. Housekeeping
+### 4. Context Decay — Graduated Context Window Management (Feature)
+
+**PRs:** [#14320](https://github.com/openclaw/openclaw/pull/14320)
+**Branch:** `feat/context-decay` (12 commits, rebased onto upstream/main)
+
+Experimental proactive context window management system. Graduated decay: Full → Summarized → Stripped → Dropped. Phase 1 adds individual tool result summarization, thinking block stripping, tool result stripping, and message capping. Phase 2 adds group-in-place window summarization for coherent multi-turn summaries.
+
+**Config knobs (all disabled by default):**
+
+- `stripThinkingAfterTurns` — strip thinking blocks after N turns
+- `summarizeToolResultsAfterTurns` — summarize individual tool results after N turns
+- `stripToolResultsAfterTurns` — strip tool results after N turns (graduated after summarize)
+- `maxContextMessages` — hard cap on context messages
+- `summarizeWindowAfterTurns` — group-summarize turn windows after N turns
+- `summarizeWindowSize` — turns per group window (default: 4)
+- `summarizationModel` / `groupSummarizationModel` — model overrides for summaries
+
+**Files (new):**
+
+- `src/agents/context-decay/` — summarizer, group-summarizer, summary-store, message-utils, turn-ages, resolve-config
+- `src/agents/pi-extensions/context-decay/` — decay logic, extension, runtime
+- `src/config/types.agent-defaults.ts` — ContextDecayConfig type
+- `src/config/zod-schema.core.ts` — Zod schema additions
+
+**Upstream status:** Not yet merged. Track via PR #14320.
+
+---
+
+### 5. Housekeeping
 
 | Commit      | Description                                                      |
 | ----------- | ---------------------------------------------------------------- |
@@ -166,7 +197,7 @@ gh pr list --repo openclaw/openclaw --author davidrudduck --state open
 
 ## Total Fork Delta
 
-- **26 non-merge commits**
-- **24 files changed** (+700 lines, -32 lines)
-- **4 change groups**: message_sent hook, .trim() guards, security hardening, housekeeping
-- **8 open PRs** upstream
+- **29 non-merge commits** (fork main) + **12 commits** (context-decay feature branch)
+- **25 files changed** (+869 lines, -32 lines) on fork main
+- **5 change groups**: message_sent hook, .trim() guards, security hardening, context decay, housekeeping
+- **9 open PRs** upstream
