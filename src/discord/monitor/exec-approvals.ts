@@ -87,8 +87,8 @@ export function parseExecApprovalData(
 
 function formatExecApprovalEmbed(request: ExecApprovalRequest) {
   const commandText = request.request.command;
-  const commandPreview =
-    commandText.length > 1000 ? `${commandText.slice(0, 1000)}...` : commandText;
+  const commandRaw = commandText.length > 1000 ? `${commandText.slice(0, 1000)}...` : commandText;
+  const commandPreview = commandRaw.replace(/`/g, "\u200b`");
   const expiresIn = Math.max(0, Math.round((request.expiresAtMs - Date.now()) / 1000));
 
   const fields: Array<{ name: string; value: string; inline: boolean }> = [
