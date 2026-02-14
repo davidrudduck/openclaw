@@ -3,24 +3,25 @@
 Tracking all changes in our fork that are not yet in upstream `openclaw/openclaw:main`.
 Use this to identify when upstream absorbs our fixes so we can drop the fork delta.
 
-**Last synced with upstream:** 2026-02-12 (upstream commit `b094491cf`)
-**Our merge commit:** `243e5c5bb`
+**Last synced with upstream:** 2026-02-14 (upstream commit `9475791d9`)
+**Our merge commit:** `98426eb6a`
 
 ---
 
 ## Open Upstream PRs
 
-| PR                                                        | Title                                            | Branch                              | Status |
-| --------------------------------------------------------- | ------------------------------------------------ | ----------------------------------- | ------ |
-| [#13185](https://github.com/openclaw/openclaw/pull/13185) | sanitize error responses to prevent info leakage | `fix/sanitize-error-responses`      | OPEN   |
-| [#13184](https://github.com/openclaw/openclaw/pull/13184) | default standalone servers to loopback bind      | `fix/default-bind-loopback`         | OPEN   |
-| [#13183](https://github.com/openclaw/openclaw/pull/13183) | use execFileSync to prevent shell injection      | `fix/execsync-to-execfilesync`      | OPEN   |
-| [#12573](https://github.com/openclaw/openclaw/pull/12573) | normalize hook addresses to canonical format     | `fix/channel-id-hook-normalization` | OPEN   |
-| [#12251](https://github.com/openclaw/openclaw/pull/12251) | timing-safe comparison for hook token auth       | `fix/hook-token-timing-safe`        | OPEN   |
-| [#12172](https://github.com/openclaw/openclaw/pull/12172) | harden resolveUserPath and compact               | `fix/trim-bug-remaining-guards`     | OPEN   |
-| [#11867](https://github.com/openclaw/openclaw/pull/11867) | wire message_sent hook — centralised             | `fix/wire-message-sent-hook-pr`     | OPEN   |
-| [#14320](https://github.com/openclaw/openclaw/pull/14320) | context decay — graduated context window mgmt    | `feat/context-decay`                | OPEN   |
-| [#11866](https://github.com/openclaw/openclaw/pull/11866) | guard .trim() on undefined in subagent           | `fix/subagent-trim-crash`           | OPEN   |
+| PR                                                        | Title                                            | Branch                                     | Status |
+| --------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------ | ------ |
+| [#13185](https://github.com/openclaw/openclaw/pull/13185) | sanitize error responses to prevent info leakage | `fix/sanitize-error-responses`             | OPEN   |
+| [#13184](https://github.com/openclaw/openclaw/pull/13184) | default standalone servers to loopback bind      | `fix/default-bind-loopback`                | OPEN   |
+| [#13183](https://github.com/openclaw/openclaw/pull/13183) | use execFileSync to prevent shell injection      | `fix/execsync-to-execfilesync`             | OPEN   |
+| [#12573](https://github.com/openclaw/openclaw/pull/12573) | normalize hook addresses to canonical format     | `fix/channel-id-hook-normalization`        | OPEN   |
+| [#12251](https://github.com/openclaw/openclaw/pull/12251) | timing-safe comparison for hook token auth       | `fix/hook-token-timing-safe`               | OPEN   |
+| [#12172](https://github.com/openclaw/openclaw/pull/12172) | harden resolveUserPath and compact               | `fix/trim-bug-remaining-guards`            | OPEN   |
+| [#11867](https://github.com/openclaw/openclaw/pull/11867) | wire message_sent hook — centralised             | `fix/wire-message-sent-hook-pr`            | OPEN   |
+| [#14320](https://github.com/openclaw/openclaw/pull/14320) | context decay — graduated context window mgmt    | `feat/context-decay`                       | OPEN   |
+| [#16178](https://github.com/openclaw/openclaw/pull/16178) | empty guild channels silently drops all messages | `fix/empty-guild-channels-allowlist-clean` | OPEN   |
+| [#11866](https://github.com/openclaw/openclaw/pull/11866) | guard .trim() on undefined in subagent           | `fix/subagent-trim-crash`                  | OPEN   |
 
 ### Closed / Superseded PRs (for reference)
 
@@ -158,7 +159,26 @@ Experimental proactive context window management system. Graduated decay: Full �
 
 ---
 
-### 5. Housekeeping
+### 5. Empty Guild Channels Allowlist Bug (Bug Fix)
+
+**PRs:** [#16178](https://github.com/openclaw/openclaw/pull/16178)
+**Branch:** `fix/empty-guild-channels-allowlist-clean`
+
+Fixes silent message drop for Discord guilds without explicit channel configurations. The upstream channel resolution feature (`c7ea47e88`) spreads `sourceGuild.channels` and `existing.channels` during guild entry merging. When both are `undefined`, `{ ...undefined, ...undefined }` produces `{}`, which `resolveDiscordChannelConfigWithFallback` treats as "channels configured but none match" → `{ allowed: false }`.
+
+| Commit      | Description                                                          |
+| ----------- | -------------------------------------------------------------------- |
+| `c361dfadc` | Treat empty channels object as unconfigured in guild allowlist check |
+
+**Files:**
+
+- `src/discord/monitor/allow-list.ts` — add `Object.keys(channels).length === 0` guard
+
+**Upstream status:** PR [#16178](https://github.com/openclaw/openclaw/pull/16178) open. Bug introduced by upstream `c7ea47e88`.
+
+---
+
+### 6. Housekeeping
 
 | Commit      | Description                                                      |
 | ----------- | ---------------------------------------------------------------- |
@@ -197,7 +217,7 @@ gh pr list --repo openclaw/openclaw --author davidrudduck --state open
 
 ## Total Fork Delta
 
-- **29 non-merge commits** (fork main) + **12 commits** (context-decay feature branch)
-- **25 files changed** (+869 lines, -32 lines) on fork main
-- **5 change groups**: message_sent hook, .trim() guards, security hardening, context decay, housekeeping
-- **9 open PRs** upstream
+- **30 non-merge commits** (fork main) + **12 commits** (context-decay feature branch)
+- **26 files changed** on fork main
+- **6 change groups**: message_sent hook, .trim() guards, security hardening, context decay, empty guild channels fix, housekeeping
+- **10 open PRs** upstream
