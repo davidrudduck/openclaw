@@ -1,0 +1,13 @@
+#!/bin/sh
+# Restore fork-specific CLAUDE.md after merge (upstream tracks it as a symlink to AGENTS.md).
+BACKUP="/data/Code/openclaw.CLAUDE.md"
+TARGET="CLAUDE.md"
+
+if [ -f "$BACKUP" ]; then
+  if [ -L "$TARGET" ] || ! diff -q "$BACKUP" "$TARGET" >/dev/null 2>&1; then
+    rm -f "$TARGET"
+    cp "$BACKUP" "$TARGET"
+    git rm --cached "$TARGET" 2>/dev/null || true
+    echo "post-merge: restored fork CLAUDE.md from backup"
+  fi
+fi
