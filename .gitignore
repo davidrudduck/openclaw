@@ -84,4 +84,5 @@ USER.md
 !.agent/workflows/
 local/
 .omc/
+CLAUDE.md
 package-lock.json
