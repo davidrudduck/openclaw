@@ -178,7 +178,25 @@ Fixes silent message drop for Discord guilds without explicit channel configurat
 
 ---
 
-### 6. Housekeeping
+### 6. Security Audit Quick Wins (Bug Fixes)
+
+**Branch:** `fix/security-audit-quick-wins`
+
+Five low-effort, high-impact hardening fixes identified during a full security audit of the codebase.
+
+| Fix | File                                    | Description                                                                                                    |
+| --- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| M1  | `src/config/includes.ts`                | Block `__proto__`, `prototype`, `constructor` in `deepMerge` to prevent prototype pollution via crafted config |
+| M2  | `src/security/secret-equal.ts`          | SHA-256 hash before `timingSafeEqual` to eliminate length-leak timing side-channel                             |
+| M4  | `src/markdown/frontmatter.ts`           | Explicit `schema: "core"` on YAML.parse to prevent YAML 1.1 type coercion (timestamps, merge keys)             |
+| H3  | `src/gateway/hooks-mapping.ts`          | Block `__proto__`, `prototype`, `constructor` in hook template `getByPath` traversal                           |
+| L3  | `src/discord/monitor/exec-approvals.ts` | Escape backticks in exec-approval command previews to prevent Discord markdown injection                       |
+
+**Upstream status:** Not yet submitted upstream. Will create upstream PR after CodeRabbit review on fork.
+
+---
+
+### 7. Housekeeping
 
 | Commit      | Description                                                      |
 | ----------- | ---------------------------------------------------------------- |
@@ -219,5 +237,5 @@ gh pr list --repo openclaw/openclaw --author davidrudduck --state open
 
 - **30 non-merge commits** (fork main) + **12 commits** (context-decay feature branch)
 - **26 files changed** on fork main
-- **6 change groups**: message_sent hook, .trim() guards, security hardening, context decay, empty guild channels fix, housekeeping
+- **7 change groups**: message_sent hook, .trim() guards, security hardening, context decay, empty guild channels fix, security audit quick wins, housekeeping
 - **10 open PRs** upstream

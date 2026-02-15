@@ -85,10 +85,15 @@ export function parseExecApprovalData(
   };
 }
 
+function escapeCodeBlock(text: string): string {
+  return text.replace(/`/g, "\u200b`");
+}
+
 function formatExecApprovalEmbed(request: ExecApprovalRequest) {
   const commandText = request.request.command;
-  const commandPreview =
-    commandText.length > 1000 ? `${commandText.slice(0, 1000)}...` : commandText;
+  const commandPreview = escapeCodeBlock(
+    commandText.length > 1000 ? `${commandText.slice(0, 1000)}...` : commandText,
+  );
   const expiresIn = Math.max(0, Math.round((request.expiresAtMs - Date.now()) / 1000));
 
   const fields: Array<{ name: string; value: string; inline: boolean }> = [
@@ -139,7 +144,9 @@ function formatResolvedEmbed(
   resolvedBy?: string | null,
 ) {
   const commandText = request.request.command;
-  const commandPreview = commandText.length > 500 ? `${commandText.slice(0, 500)}...` : commandText;
+  const commandPreview = escapeCodeBlock(
+    commandText.length > 500 ? `${commandText.slice(0, 500)}...` : commandText,
+  );
 
   const decisionLabel =
     decision === "allow-once"
@@ -168,7 +175,9 @@ function formatResolvedEmbed(
 
 function formatExpiredEmbed(request: ExecApprovalRequest) {
   const commandText = request.request.command;
-  const commandPreview = commandText.length > 500 ? `${commandText.slice(0, 500)}...` : commandText;
+  const commandPreview = escapeCodeBlock(
+    commandText.length > 500 ? `${commandText.slice(0, 500)}...` : commandText,
+  );
 
   return {
     title: "Exec Approval: Expired",
