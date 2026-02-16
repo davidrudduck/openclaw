@@ -1,7 +1,7 @@
 import type { SlackEventMiddlewareArgs } from "@slack/bolt";
 import type { SlackMonitorContext } from "../context.js";
 import type { SlackReactionEvent } from "../types.js";
-import { danger } from "../../../globals.js";
+import { danger, logVerbose } from "../../../globals.js";
 import { enqueueSystemEvent } from "../../../infra/system-events.js";
 import { resolveSlackChannelLabel } from "../channel-config.js";
 
@@ -64,8 +64,8 @@ export function registerSlackReactionEvents(params: { ctx: SlackMonitorContext }
               const msgUser = msg.user ? await ctx.resolveUserName(msg.user) : undefined;
               reactedMessageAuthor = msgUser?.name ?? msg.user;
             }
-          } catch {
-            // Best-effort message content fetch
+          } catch (err) {
+            logVerbose(`slack: failed to fetch reacted message: ${String(err)}`);
           }
         }
 
@@ -81,7 +81,7 @@ export function registerSlackReactionEvents(params: { ctx: SlackMonitorContext }
             channel: "slack",
             accountId: ctx.accountId,
             sessionKey,
-            messageId: item.ts ?? "",
+            messageId: item.ts ?? "unknown",
             reactedMessageContent,
             reactedMessageAuthor,
             conversationLabel: channelLabel,
