@@ -142,6 +142,9 @@ export const TelegramAccountSchemaBase = z
       .strict()
       .optional(),
     reactionNotifications: z.enum(["off", "own", "all"]).optional(),
+    reactionDelivery: z.enum(["deferred", "immediate"]).optional(),
+    reactionBundleWindowMs: z.number().int().min(0).max(60000).optional(),
+    reactionIncludeMessage: z.boolean().optional(),
     reactionLevel: z.enum(["off", "ack", "minimal", "extensive"]).optional(),
     heartbeat: ChannelHeartbeatVisibilitySchema,
     linkPreview: z.boolean().optional(),
@@ -256,6 +259,9 @@ export const DiscordGuildSchema = z
     tools: ToolPolicySchema,
     toolsBySender: ToolPolicyBySenderSchema,
     reactionNotifications: z.enum(["off", "own", "all", "allowlist"]).optional(),
+    reactionDelivery: z.enum(["deferred", "immediate"]).optional(),
+    reactionBundleWindowMs: z.number().int().min(0).max(60000).optional(),
+    reactionIncludeMessage: z.boolean().optional(),
     users: z.array(z.union([z.string(), z.number()])).optional(),
     roles: z.array(z.union([z.string(), z.number()])).optional(),
     channels: z.record(z.string(), DiscordGuildChannelSchema.optional()).optional(),
@@ -535,6 +541,9 @@ export const SlackAccountSchema = z
     mediaMaxMb: z.number().positive().optional(),
     reactionNotifications: z.enum(["off", "own", "all", "allowlist"]).optional(),
     reactionAllowlist: z.array(z.union([z.string(), z.number()])).optional(),
+    reactionDelivery: z.enum(["deferred", "immediate"]).optional(),
+    reactionBundleWindowMs: z.number().int().min(0).max(60000).optional(),
+    reactionIncludeMessage: z.boolean().optional(),
     replyToMode: ReplyToModeSchema.optional(),
     replyToModeByChatType: SlackReplyToModeByChatTypeSchema.optional(),
     thread: SlackThreadSchema.optional(),
@@ -639,6 +648,9 @@ export const SignalAccountSchemaBase = z
     mediaMaxMb: z.number().int().positive().optional(),
     reactionNotifications: z.enum(["off", "own", "all", "allowlist"]).optional(),
     reactionAllowlist: z.array(z.union([z.string(), z.number()])).optional(),
+    reactionDelivery: z.enum(["deferred", "immediate"]).optional(),
+    reactionBundleWindowMs: z.number().int().min(0).max(60000).optional(),
+    reactionIncludeMessage: z.boolean().optional(),
     actions: z
       .object({
         reactions: z.boolean().optional(),
@@ -806,6 +818,9 @@ export const IMessageAccountSchemaBase = z
           .optional(),
       )
       .optional(),
+    reactionDelivery: z.enum(["deferred", "immediate"]).optional(),
+    reactionBundleWindowMs: z.number().int().min(0).max(60000).optional(),
+    reactionIncludeMessage: z.boolean().optional(),
     heartbeat: ChannelHeartbeatVisibilitySchema,
     responsePrefix: z.string().optional(),
   })
@@ -886,6 +901,9 @@ export const BlueBubblesAccountSchemaBase = z
     blockStreaming: z.boolean().optional(),
     blockStreamingCoalesce: BlockStreamingCoalesceSchema.optional(),
     groups: z.record(z.string(), BlueBubblesGroupConfigSchema.optional()).optional(),
+    reactionDelivery: z.enum(["deferred", "immediate"]).optional(),
+    reactionBundleWindowMs: z.number().int().min(0).max(60000).optional(),
+    reactionIncludeMessage: z.boolean().optional(),
     heartbeat: ChannelHeartbeatVisibilitySchema,
     responsePrefix: z.string().optional(),
   })

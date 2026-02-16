@@ -28,6 +28,10 @@
       "types": "./dist/plugin-sdk/index.d.ts",
       "default": "./dist/plugin-sdk/index.js"
     },
+    "./reaction-dispatch": {
+      "types": "./dist/infra/reaction-dispatch/index.d.ts",
+      "default": "./dist/infra/reaction-dispatch/index.js"
+    },
     "./cli-entry": "./openclaw.mjs"
   },
   "scripts": {

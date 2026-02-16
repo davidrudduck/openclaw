@@ -464,14 +464,41 @@ export function createTelegramBot(opts: TelegramBotOptions) {
       const sessionKey = route.sessionKey;
 
       // Enqueue system event for each added reaction
-      for (const r of addedReactions) {
-        const emoji = r.emoji;
-        const text = `Telegram reaction added: ${emoji} by ${senderLabel} on msg ${messageId}`;
-        enqueueSystemEvent(text, {
-          sessionKey: sessionKey,
-          contextKey: `telegram:reaction:add:${chatId}:${messageId}:${user?.id ?? "anon"}:${emoji}`,
-        });
-        logVerbose(`telegram: reaction event enqueued: ${text}`);
+      if (telegramCfg?.reactionDelivery === "immediate") {
+        const { getReactionDebouncer } = await import("../infra/reaction-dispatch/index.js");
+        const debouncer = getReactionDebouncer(telegramCfg.reactionBundleWindowMs);
+
+        for (const r of addedReactions) {
+          await debouncer.enqueue(
+            {
+              emoji: r.emoji,
+              actorLabel: senderLabel,
+              actorId: user?.id ? String(user.id) : undefined,
+              action: "added",
+              ts: Date.now(),
+            },
+            {
+              channel: "telegram",
+              accountId: account.accountId,
+              sessionKey,
+              messageId: String(messageId),
+              conversationLabel: isGroup ? `group:${chatId}` : `dm:${chatId}`,
+            },
+          );
+        }
+        logVerbose(
+          `telegram: ${addedReactions.length} reaction(s) enqueued for immediate dispatch on msg ${messageId}`,
+        );
+      } else {
+        for (const r of addedReactions) {
+          const emoji = r.emoji;
+          const text = `Telegram reaction added: ${emoji} by ${senderLabel} on msg ${messageId}`;
+          enqueueSystemEvent(text, {
+            sessionKey: sessionKey,
+            contextKey: `telegram:reaction:add:${chatId}:${messageId}:${user?.id ?? "anon"}:${emoji}`,
+          });
+          logVerbose(`telegram: reaction event enqueued: ${text}`);
+        }
       }
     } catch (err) {
       runtime.error?.(danger(`telegram reaction handler failed: ${String(err)}`));
