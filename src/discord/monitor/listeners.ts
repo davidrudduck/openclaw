@@ -290,10 +290,44 @@ async function handleDiscordReactionEvent(params: {
       },
       parentPeer: parentId ? { kind: "channel", id: parentId } : undefined,
     });
-    enqueueSystemEvent(text, {
-      sessionKey: route.sessionKey,
-      contextKey: `discord:reaction:${action}:${data.message_id}:${user.id}:${emojiLabel}`,
-    });
+    if (guildInfo?.reactionDelivery === "immediate") {
+      // Use the reaction debouncer for immediate delivery
+      const { getReactionDebouncer } = await import("../../infra/reaction-dispatch/index.js");
+      const debouncer = getReactionDebouncer(guildInfo.reactionBundleWindowMs);
+
+      const reactedMessageContent = guildInfo.reactionIncludeMessage
+        ? message?.content || undefined
+        : undefined;
+      const reactedMessageAuthor =
+        guildInfo.reactionIncludeMessage && message?.author
+          ? formatDiscordUserTag(message.author)
+          : undefined;
+
+      await debouncer.enqueue(
+        {
+          emoji: emojiLabel,
+          actorLabel,
+          actorId: user.id,
+          action,
+          ts: Date.now(),
+        },
+        {
+          channel: "discord",
+          accountId: params.accountId,
+          sessionKey: route.sessionKey,
+          messageId: data.message_id,
+          reactedMessageContent,
+          reactedMessageAuthor,
+          conversationLabel: `${guildSlug} ${channelLabel}`,
+        },
+      );
+    } else {
+      // Existing deferred path
+      enqueueSystemEvent(text, {
+        sessionKey: route.sessionKey,
+        contextKey: `discord:reaction:${action}:${data.message_id}:${user.id}:${emojiLabel}`,
+      });
+    }
   } catch (err) {
     params.logger.error(danger(`discord reaction handler failed: ${String(err)}`));
   }

@@ -86,6 +86,9 @@ export type SlackMonitorContext = {
   useAccessGroups: boolean;
   reactionMode: SlackReactionNotificationMode;
   reactionAllowlist: Array<string | number>;
+  reactionDelivery: import("../../config/types.reactions.js").ReactionDelivery;
+  reactionBundleWindowMs?: number;
+  reactionIncludeMessage?: boolean;
   replyToMode: "off" | "first" | "all";
   threadHistoryScope: "thread" | "channel";
   threadInheritParent: boolean;
@@ -147,6 +150,9 @@ export function createSlackMonitorContext(params: {
   useAccessGroups: boolean;
   reactionMode: SlackReactionNotificationMode;
   reactionAllowlist: Array<string | number>;
+  reactionDelivery: SlackMonitorContext["reactionDelivery"];
+  reactionBundleWindowMs?: number;
+  reactionIncludeMessage?: boolean;
   replyToMode: SlackMonitorContext["replyToMode"];
   threadHistoryScope: SlackMonitorContext["threadHistoryScope"];
   threadInheritParent: SlackMonitorContext["threadInheritParent"];
@@ -409,6 +415,9 @@ export function createSlackMonitorContext(params: {
     useAccessGroups: params.useAccessGroups,
     reactionMode: params.reactionMode,
     reactionAllowlist: params.reactionAllowlist,
+    reactionDelivery: params.reactionDelivery,
+    reactionBundleWindowMs: params.reactionBundleWindowMs,
+    reactionIncludeMessage: params.reactionIncludeMessage,
     replyToMode: params.replyToMode,
     threadHistoryScope: params.threadHistoryScope,
     threadInheritParent: params.threadInheritParent,

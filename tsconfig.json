@@ -19,7 +19,8 @@
     "useDefineForClassFields": false,
     "paths": {
       "*": ["./*"],
-      "openclaw/plugin-sdk": ["./src/plugin-sdk/index.ts"]
+      "openclaw/plugin-sdk": ["./src/plugin-sdk/index.ts"],
+      "openclaw/reaction-dispatch": ["./src/infra/reaction-dispatch/index.ts"]
     }
   },
   "include": ["src/**/*", "ui/**/*", "extensions/**/*"],
