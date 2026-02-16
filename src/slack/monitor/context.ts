@@ -1,7 +1,7 @@
 import type { App } from "@slack/bolt";
 import type { HistoryEntry } from "../../auto-reply/reply/history.js";
 import type { OpenClawConfig, SlackReactionNotificationMode } from "../../config/config.js";
-import type { DmPolicy, GroupPolicy } from "../../config/types.js";
+import type { DmPolicy, GroupPolicy, ReactionDelivery } from "../../config/types.js";
 import type { RuntimeEnv } from "../../runtime.js";
 import type { SlackMessageEvent } from "../types.js";
 import { formatAllowlistMatchMeta } from "../../channels/allowlist-match.js";
@@ -86,7 +86,7 @@ export type SlackMonitorContext = {
   useAccessGroups: boolean;
   reactionMode: SlackReactionNotificationMode;
   reactionAllowlist: Array<string | number>;
-  reactionDelivery: import("../../config/types.reactions.js").ReactionDelivery;
+  reactionDelivery: ReactionDelivery;
   reactionBundleWindowMs?: number;
   reactionIncludeMessage?: boolean;
   replyToMode: "off" | "first" | "all";
