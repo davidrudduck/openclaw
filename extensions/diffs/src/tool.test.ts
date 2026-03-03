@@ -441,6 +441,7 @@ function createApi(): OpenClawPluginApi {
     registerService() {},
     registerProvider() {},
     registerCommand() {},
+    registerSessionStoreAdapter() {},
     resolvePath(input: string) {
       return input;
     },

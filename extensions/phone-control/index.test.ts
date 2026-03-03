@@ -40,6 +40,7 @@ function createApi(params: {
     registerService() {},
     registerProvider() {},
     registerCommand: params.registerCommand,
+    registerSessionStoreAdapter() {},
     resolvePath(input: string) {
       return input;
     },

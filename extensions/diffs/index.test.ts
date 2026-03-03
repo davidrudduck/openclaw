@@ -30,6 +30,7 @@ describe("diffs plugin registration", () => {
       registerService() {},
       registerProvider() {},
       registerCommand() {},
+      registerSessionStoreAdapter() {},
       resolvePath(input: string) {
         return input;
       },
@@ -98,6 +99,7 @@ describe("diffs plugin registration", () => {
       registerService() {},
       registerProvider() {},
       registerCommand() {},
+      registerSessionStoreAdapter() {},
       resolvePath(input: string) {
         return input;
       },

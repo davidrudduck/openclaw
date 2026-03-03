@@ -46,10 +46,11 @@ function fakeApi(overrides: Partial<OpenClawPluginApi> = {}): OpenClawPluginApi 
     registerHook() {},
     registerHttpRoute() {},
     registerCommand() {},
+    registerSessionStoreAdapter() {},
     on() {},
     resolvePath: (p) => p,
     ...overrides,
-  };
+  } as OpenClawPluginApi;
 }
 
 function fakeCtx(overrides: Partial<OpenClawPluginToolContext> = {}): OpenClawPluginToolContext {
