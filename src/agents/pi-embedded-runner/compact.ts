@@ -258,6 +258,13 @@ export async function compactEmbeddedPiSessionDirect(
 
   const provider = (params.provider ?? DEFAULT_PROVIDER).trim() || DEFAULT_PROVIDER;
   const modelId = (params.model ?? DEFAULT_MODEL).trim() || DEFAULT_MODEL;
+
+  // Check if compaction is disabled by config
+  const compactionCfg = params.config?.agents?.defaults?.compaction;
+  if (compactionCfg?.enabled === false) {
+    return { ok: true, compacted: false, reason: "compaction disabled by config" };
+  }
+
   const fail = (reason: string): EmbeddedPiCompactResult => {
     log.warn(
       `[compaction-diag] end runId=${runId} sessionKey=${params.sessionKey ?? params.sessionId} ` +

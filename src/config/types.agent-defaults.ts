@@ -283,6 +283,8 @@ export type AgentCompactionMode = "default" | "safeguard";
 export type AgentCompactionIdentifierPolicy = "strict" | "off" | "custom";
 
 export type AgentCompactionConfig = {
+  /** When false, disables all compaction (safeguard and direct). Default: true. */
+  enabled?: boolean;
   /** Compaction summarization mode. */
   mode?: AgentCompactionMode;
   /** Pi reserve tokens target before floor enforcement. */

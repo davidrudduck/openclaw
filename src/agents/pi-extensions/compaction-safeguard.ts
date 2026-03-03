@@ -451,6 +451,10 @@ export default function compactionSafeguardExtension(api: ExtensionAPI): void {
     // Model resolution: ctx.model is undefined in compact.ts workflow (extensionRunner.initialize() is never called).
     // Fall back to runtime.model which is explicitly passed when building extension paths.
     const runtime = getCompactionSafeguardRuntime(ctx.sessionManager);
+    if (runtime?.enabled === false) {
+      log.info("Compaction safeguard: compaction disabled by config; cancelling.");
+      return { cancel: true };
+    }
     const summarizationInstructions = {
       identifierPolicy: runtime?.identifierPolicy,
       identifierInstructions: runtime?.identifierInstructions,

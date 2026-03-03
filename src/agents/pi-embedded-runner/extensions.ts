@@ -69,8 +69,8 @@ export function buildEmbeddedExtensionFactories(params: {
   model: Model<Api> | undefined;
 }): ExtensionFactory[] {
   const factories: ExtensionFactory[] = [];
-  if (resolveCompactionMode(params.cfg) === "safeguard") {
-    const compactionCfg = params.cfg?.agents?.defaults?.compaction;
+  const compactionCfg = params.cfg?.agents?.defaults?.compaction;
+  if (resolveCompactionMode(params.cfg) === "safeguard" && compactionCfg?.enabled !== false) {
     const contextWindowInfo = resolveContextWindowInfo({
       cfg: params.cfg,
       provider: params.provider,
@@ -79,6 +79,7 @@ export function buildEmbeddedExtensionFactories(params: {
       defaultTokens: DEFAULT_CONTEXT_TOKENS,
     });
     setCompactionSafeguardRuntime(params.sessionManager, {
+      enabled: compactionCfg?.enabled,
       maxHistoryShare: compactionCfg?.maxHistoryShare,
       contextWindowTokens: contextWindowInfo.tokens,
       identifierPolicy: compactionCfg?.identifierPolicy,
