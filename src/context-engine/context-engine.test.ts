@@ -63,21 +63,57 @@ class MockContextEngine implements ContextEngine {
     version: "0.0.1",
   };
 
-  async ingest(_params: {
+  /** Captures the last sessionKey received by each method for test assertions. */
+  lastSessionKeys: Record<string, string | undefined> = {};
+
+  async bootstrap(params: {
     sessionId: string;
+    sessionFile: string;
     sessionKey?: string;
+  }): Promise<{ bootstrapped: boolean }> {
+    this.lastSessionKeys.bootstrap = params.sessionKey;
+    return { bootstrapped: true };
+  }
+
+  async ingest(params: {
+    sessionId: string;
     message: AgentMessage;
     isHeartbeat?: boolean;
+    sessionKey?: string;
   }): Promise<IngestResult> {
+    this.lastSessionKeys.ingest = params.sessionKey;
     return { ingested: true };
+  }
+
+  async ingestBatch(params: {
+    sessionId: string;
+    messages: AgentMessage[];
+    isHeartbeat?: boolean;
+    sessionKey?: string;
+  }): Promise<{ ingestedCount: number }> {
+    this.lastSessionKeys.ingestBatch = params.sessionKey;
+    return { ingestedCount: params.messages.length };
+  }
+
+  async afterTurn(params: {
+    sessionId: string;
+    sessionFile: string;
+    messages: AgentMessage[];
+    prePromptMessageCount: number;
+    tokenBudget?: number;
+    sessionKey?: string;
+    runtimeContext?: Record<string, unknown>;
+  }): Promise<void> {
+    this.lastSessionKeys.afterTurn = params.sessionKey;
   }
 
   async assemble(params: {
     sessionId: string;
-    sessionKey?: string;
     messages: AgentMessage[];
     tokenBudget?: number;
+    sessionKey?: string;
   }): Promise<AssembleResult> {
+    this.lastSessionKeys.assemble = params.sessionKey;
     return {
       messages: params.messages,
       estimatedTokens: 42,
@@ -85,15 +121,16 @@ class MockContextEngine implements ContextEngine {
     };
   }
 
-  async compact(_params: {
+  async compact(params: {
     sessionId: string;
-    sessionKey?: string;
     sessionFile: string;
     tokenBudget?: number;
     compactionTarget?: "budget" | "threshold";
     customInstructions?: string;
+    sessionKey?: string;
     runtimeContext?: Record<string, unknown>;
   }): Promise<CompactResult> {
+    this.lastSessionKeys.compact = params.sessionKey;
     return {
       ok: true,
       compacted: true,
@@ -915,5 +952,89 @@ describe("Bundle chunk isolation (#40096)", () => {
     for (const id of ids) {
       expect(allIds).toContain(id);
     }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 8. sessionKey propagation
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe("sessionKey propagation", () => {
+  const SESSION_KEY = "agent:main:whatsapp:direct:user123";
+
+  it("bootstrap() receives sessionKey", async () => {
+    const engine = new MockContextEngine();
+    await engine.bootstrap({
+      sessionId: "s1",
+      sessionFile: "/tmp/s1.jsonl",
+      sessionKey: SESSION_KEY,
+    });
+    expect(engine.lastSessionKeys.bootstrap).toBe(SESSION_KEY);
+  });
+
+  it("ingest() receives sessionKey", async () => {
+    const engine = new MockContextEngine();
+    await engine.ingest({
+      sessionId: "s1",
+      message: makeMockMessage(),
+      sessionKey: SESSION_KEY,
+    });
+    expect(engine.lastSessionKeys.ingest).toBe(SESSION_KEY);
+  });
+
+  it("ingestBatch() receives sessionKey", async () => {
+    const engine = new MockContextEngine();
+    await engine.ingestBatch({
+      sessionId: "s1",
+      messages: [makeMockMessage(), makeMockMessage("assistant", "hi")],
+      sessionKey: SESSION_KEY,
+    });
+    expect(engine.lastSessionKeys.ingestBatch).toBe(SESSION_KEY);
+  });
+
+  it("afterTurn() receives sessionKey", async () => {
+    const engine = new MockContextEngine();
+    await engine.afterTurn({
+      sessionId: "s1",
+      sessionFile: "/tmp/s1.jsonl",
+      messages: [makeMockMessage()],
+      prePromptMessageCount: 0,
+      sessionKey: SESSION_KEY,
+    });
+    expect(engine.lastSessionKeys.afterTurn).toBe(SESSION_KEY);
+  });
+
+  it("assemble() receives sessionKey", async () => {
+    const engine = new MockContextEngine();
+    await engine.assemble({
+      sessionId: "s1",
+      messages: [makeMockMessage()],
+      tokenBudget: 100_000,
+      sessionKey: SESSION_KEY,
+    });
+    expect(engine.lastSessionKeys.assemble).toBe(SESSION_KEY);
+  });
+
+  it("compact() receives sessionKey", async () => {
+    const engine = new MockContextEngine();
+    await engine.compact({
+      sessionId: "s1",
+      sessionFile: "/tmp/s1.jsonl",
+      tokenBudget: 100_000,
+      sessionKey: SESSION_KEY,
+    });
+    expect(engine.lastSessionKeys.compact).toBe(SESSION_KEY);
+  });
+
+  it("sessionKey is optional — methods work without it", async () => {
+    const engine = new MockContextEngine();
+    await engine.ingest({ sessionId: "s1", message: makeMockMessage() });
+    expect(engine.lastSessionKeys.ingest).toBeUndefined();
+
+    await engine.assemble({ sessionId: "s1", messages: [] });
+    expect(engine.lastSessionKeys.assemble).toBeUndefined();
+
+    await engine.compact({ sessionId: "s1", sessionFile: "/tmp/s.jsonl" });
+    expect(engine.lastSessionKeys.compact).toBeUndefined();
   });
 });

@@ -110,8 +110,9 @@ export interface ContextEngine {
    */
   bootstrap?(params: {
     sessionId: string;
-    sessionKey?: string;
     sessionFile: string;
+    /** Canonical session key (e.g. "agent:main:whatsapp:direct:user123"). */
+    sessionKey?: string;
   }): Promise<BootstrapResult>;
 
   /**
@@ -132,10 +133,11 @@ export interface ContextEngine {
    */
   ingest(params: {
     sessionId: string;
-    sessionKey?: string;
     message: AgentMessage;
     /** True when the message belongs to a heartbeat run. */
     isHeartbeat?: boolean;
+    /** Canonical session key (e.g. "agent:main:whatsapp:direct:user123"). */
+    sessionKey?: string;
   }): Promise<IngestResult>;
 
   /**
@@ -143,10 +145,11 @@ export interface ContextEngine {
    */
   ingestBatch?(params: {
     sessionId: string;
-    sessionKey?: string;
     messages: AgentMessage[];
     /** True when the batch belongs to a heartbeat run. */
     isHeartbeat?: boolean;
+    /** Canonical session key (e.g. "agent:main:whatsapp:direct:user123"). */
+    sessionKey?: string;
   }): Promise<IngestBatchResult>;
 
   /**
@@ -156,7 +159,6 @@ export interface ContextEngine {
    */
   afterTurn?(params: {
     sessionId: string;
-    sessionKey?: string;
     sessionFile: string;
     messages: AgentMessage[];
     /** Number of messages that existed before the prompt was sent. */
@@ -167,6 +169,8 @@ export interface ContextEngine {
     isHeartbeat?: boolean;
     /** Optional model context token budget for proactive compaction. */
     tokenBudget?: number;
+    /** Canonical session key (e.g. "agent:main:whatsapp:direct:user123"). */
+    sessionKey?: string;
     /** Optional runtime-owned context for engines that need caller state. */
     runtimeContext?: ContextEngineRuntimeContext;
   }): Promise<void>;
@@ -177,7 +181,6 @@ export interface ContextEngine {
    */
   assemble(params: {
     sessionId: string;
-    sessionKey?: string;
     messages: AgentMessage[];
     tokenBudget?: number;
     /** Current model identifier (e.g. "claude-opus-4", "gpt-4o", "qwen2.5-7b").
@@ -185,6 +188,8 @@ export interface ContextEngine {
     model?: string;
     /** The incoming user prompt for this turn (useful for retrieval-oriented engines). */
     prompt?: string;
+    /** Canonical session key (e.g. "agent:main:whatsapp:direct:user123"). */
+    sessionKey?: string;
   }): Promise<AssembleResult>;
 
   /**
@@ -193,7 +198,6 @@ export interface ContextEngine {
    */
   compact(params: {
     sessionId: string;
-    sessionKey?: string;
     sessionFile: string;
     tokenBudget?: number;
     /** Force compaction even below the default trigger threshold. */
@@ -203,6 +207,8 @@ export interface ContextEngine {
     /** Controls convergence target; defaults to budget. */
     compactionTarget?: "budget" | "threshold";
     customInstructions?: string;
+    /** Canonical session key (e.g. "agent:main:whatsapp:direct:user123"). */
+    sessionKey?: string;
     /** Optional runtime-owned context for engines that need caller state. */
     runtimeContext?: ContextEngineRuntimeContext;
   }): Promise<CompactResult>;

@@ -2467,10 +2467,10 @@ export async function runEmbeddedAttempt(
             const assembled = await assembleAttemptContextEngine({
               contextEngine: params.contextEngine,
               sessionId: params.sessionId,
-              sessionKey: params.sessionKey,
               messages: activeSession.messages,
               tokenBudget: params.contextTokenBudget,
               modelId: params.modelId,
+              sessionKey: params.sessionKey,
               ...(params.prompt !== undefined ? { prompt: params.prompt } : {}),
             });
             if (!assembled) {
