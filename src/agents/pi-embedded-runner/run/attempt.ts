@@ -271,6 +271,34 @@ function createYieldAbortedResponse(model: { api?: string; provider?: string; id
   };
 }
 
+// Some providers (e.g. OpenAI-compatible local models via Bifrost) can return
+// assistant message content as a plain string instead of the expected content-block
+// array. Normalize before pi-ai's transformMessages() calls .flatMap()/.filter().
+function normalizeAssistantContentToArray(activeSession: {
+  messages: AgentMessage[];
+  agent: { replaceMessages: (messages: AgentMessage[]) => void };
+}) {
+  let patched = false;
+  const normalized = activeSession.messages.map((msg) => {
+    if (
+      msg &&
+      typeof msg === "object" &&
+      (msg as { role?: string }).role === "assistant" &&
+      typeof (msg as { content?: unknown }).content === "string"
+    ) {
+      patched = true;
+      return {
+        ...msg,
+        content: [{ type: "text" as const, text: (msg as { content: string }).content }],
+      } as AgentMessage;
+    }
+    return msg;
+  });
+  if (patched) {
+    activeSession.agent.replaceMessages(normalized);
+  }
+}
+
 // Queue a hidden steering message so pi-agent-core injects it before the next
 // LLM call once the current assistant turn finishes executing its tool calls.
 export function queueSessionsYieldInterruptMessage(activeSession: {
@@ -2893,6 +2921,10 @@ export async function runEmbeddedAttempt(
             messages: btwSnapshotMessages,
             inFlightPrompt: effectivePrompt,
           });
+
+          // Normalize any provider assistant messages with string content to array
+          // format before pi-ai's transformMessages() calls .flatMap() on them.
+          normalizeAssistantContentToArray(activeSession);
 
           // Only pass images option if there are actually images to pass
           // This avoids potential issues with models that don't expect the images parameter
